@@ -34,7 +34,7 @@ export function ScheduleOverview({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-xs font-mono font-bold uppercase text-muted-foreground tracking-wider">
+      <h3 className="text-xs font-extrabold uppercase text-muted-foreground tracking-wide">
         Upcoming Wash Schedule
       </h3>
       <div className="space-y-2">
@@ -88,7 +88,7 @@ export function ScheduleOverview({
                     wash.type === "completed"
                       ? "bg-wash-day/20 text-wash-day border-wash-day/40"
                       : wash.type === "scheduled"
-                        ? "bg-primary/15 text-primary border-primary/40"
+                        ? "bg-building-day/15 text-building-day border-building-day/40"
                         : "bg-secondary text-muted-foreground border-border"
                   }`}
                 >

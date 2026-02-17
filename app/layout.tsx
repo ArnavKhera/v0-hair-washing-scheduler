@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Space_Mono } from 'next/font/google'
+import { Nunito, Space_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const nunito = Nunito({ subsets: ["latin"], variable: "--font-nunito" });
 const spaceMono = Space_Mono({ weight: ["400", "700"], subsets: ["latin"], variable: "--font-space-mono" });
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1a1c2e',
+  themeColor: '#faf5f0',
 }
 
 export default function RootLayout({
@@ -21,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} ${spaceMono.variable} font-sans antialiased`}>
+    <html lang="en">
+      <body className={`${nunito.variable} ${spaceMono.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>

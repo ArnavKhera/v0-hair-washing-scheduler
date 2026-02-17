@@ -60,7 +60,7 @@ function getPhaseColor(phase: DayInfo["phase"]): string {
     case "wash":
       return "bg-wash-day/20 text-wash-day border-wash-day/40";
     case "building":
-      return "bg-primary/15 text-primary border-primary/40";
+      return "bg-building-day/15 text-building-day border-building-day/40";
     case "ideal":
       return "bg-ideal-day/20 text-ideal-day border-ideal-day/40";
     case "good":
@@ -74,8 +74,8 @@ function getPhaseColor(phase: DayInfo["phase"]): string {
 
 function getQualityGradient(quality: number): string {
   if (quality >= 80) return "from-ideal-day to-good-day";
-  if (quality >= 60) return "from-good-day to-event-day";
-  if (quality >= 40) return "from-event-day to-bad-day";
+  if (quality >= 60) return "from-good-day to-building-day";
+  if (quality >= 40) return "from-building-day to-bad-day";
   return "from-bad-day to-destructive";
 }
 
@@ -128,7 +128,7 @@ export function DayDetail({
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-xs text-muted-foreground">Curl Quality</span>
-          <span className="text-sm font-mono font-bold text-foreground">
+          <span className="text-sm font-extrabold text-foreground">
             {dayInfo.curlQuality}%
           </span>
         </div>
@@ -142,7 +142,7 @@ export function DayDetail({
 
       {dayInfo.weather && (
         <div className="p-3 rounded-lg bg-secondary/50 border border-border">
-          <h4 className="text-xs font-mono font-bold uppercase text-muted-foreground mb-2">
+          <h4 className="text-xs font-extrabold uppercase text-muted-foreground mb-2">
             Weather Forecast
           </h4>
           <div className="grid grid-cols-2 gap-3">
@@ -187,7 +187,7 @@ export function DayDetail({
 
       {dayInfo.events.length > 0 && (
         <div className="space-y-1.5">
-          <h4 className="text-xs font-mono font-bold uppercase text-muted-foreground">
+          <h4 className="text-xs font-extrabold uppercase text-muted-foreground">
             Events
           </h4>
           {dayInfo.events.map((event) => (
@@ -208,8 +208,8 @@ export function DayDetail({
       )}
 
       {suggested && (
-        <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
-          <p className="text-xs text-primary font-medium mb-1">
+        <div className="p-3 rounded-xl bg-wash-day/10 border-2 border-wash-day/30">
+          <p className="text-xs text-wash-day font-bold mb-1">
             Suggested wash day
           </p>
           <p className="text-xs text-muted-foreground">{suggested.reason}</p>

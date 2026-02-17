@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import type { DayInfo, WashDay, CalendarEvent } from "@/lib/hair-scheduler-types";
-import { ChevronLeft, ChevronRight, Droplets, Star, CalendarDays } from "lucide-react";
+import type { DayInfo } from "@/lib/hair-scheduler-types";
+import { ChevronLeft, ChevronRight, Droplets, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -20,18 +20,18 @@ function dateStr(d: Date): string {
 }
 
 function getQualityColor(quality: number, phase: DayInfo["phase"]): string {
-  if (phase === "wash") return "bg-wash-day/20 border-wash-day/50 text-foreground";
-  if (phase === "ideal") return "bg-ideal-day/20 border-ideal-day/50 text-foreground";
-  if (phase === "good") return "bg-good-day/15 border-good-day/40 text-foreground";
-  if (phase === "building") return "bg-primary/10 border-primary/30 text-foreground";
-  if (phase === "declining") return "bg-bad-day/15 border-bad-day/40 text-foreground";
+  if (phase === "wash") return "bg-wash-day/15 border-wash-day/40 text-foreground";
+  if (phase === "building") return "bg-building-day/15 border-building-day/40 text-foreground";
+  if (phase === "ideal") return "bg-ideal-day/15 border-ideal-day/40 text-foreground";
+  if (phase === "good") return "bg-good-day/12 border-good-day/35 text-foreground";
+  if (phase === "declining") return "bg-bad-day/12 border-bad-day/35 text-foreground";
   return "bg-secondary/50 border-border text-muted-foreground";
 }
 
 function getQualityBar(quality: number): string {
   if (quality >= 90) return "bg-ideal-day";
   if (quality >= 70) return "bg-good-day";
-  if (quality >= 50) return "bg-event-day";
+  if (quality >= 50) return "bg-building-day";
   if (quality >= 30) return "bg-bad-day";
   return "bg-destructive";
 }
@@ -105,7 +105,7 @@ export function HairCalendar({
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
             <div
               key={d}
-              className="text-center text-xs font-mono text-muted-foreground py-1"
+              className="text-center text-xs font-semibold text-muted-foreground py-1"
             >
               {d}
             </div>
@@ -129,15 +129,15 @@ export function HairCalendar({
                   <button
                     onClick={() => onDayClick(date)}
                     className={`
-                      aspect-square rounded-lg border text-sm relative flex flex-col items-center justify-center gap-0.5
+                      aspect-square rounded-xl border-2 text-sm relative flex flex-col items-center justify-center gap-0.5
                       transition-all duration-150 cursor-pointer
                       ${info ? getQualityColor(info.curlQuality, info.phase) : "bg-secondary/30 border-border text-muted-foreground"}
-                      ${isToday ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : ""}
-                      ${isSelected ? "ring-2 ring-foreground ring-offset-1 ring-offset-background" : ""}
+                      ${isToday ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}
+                      ${isSelected ? "ring-2 ring-foreground ring-offset-2 ring-offset-background scale-105" : ""}
                       hover:scale-105 hover:shadow-md
                     `}
                   >
-                    <span className={`text-xs font-medium ${isToday ? "text-primary font-bold" : ""}`}>
+                    <span className={`text-xs font-bold ${isToday ? "text-primary" : ""}`}>
                       {dayNum}
                     </span>
                     {info && info.phase !== "none" && (
@@ -156,7 +156,7 @@ export function HairCalendar({
                 {info && (
                   <TooltipContent side="top" className="max-w-xs bg-card border-border text-card-foreground">
                     <div className="space-y-1">
-                      <p className="font-medium text-sm">{new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</p>
+                      <p className="font-bold text-sm">{new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</p>
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${getQualityBar(info.curlQuality)}`} />
                         <span className="text-xs">
@@ -174,7 +174,7 @@ export function HairCalendar({
                         </p>
                       )}
                       {info.isWashDay && (
-                        <p className="text-xs font-medium text-wash-day">
+                        <p className="text-xs font-bold text-wash-day">
                           Wash day ({info.washType})
                         </p>
                       )}
@@ -191,26 +191,54 @@ export function HairCalendar({
           })}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-3 text-xs">
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-wash-day/30 border border-wash-day/60" />
-            <span className="text-muted-foreground">Wash day</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-primary/15 border border-primary/40" />
-            <span className="text-muted-foreground">Building</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-ideal-day/25 border border-ideal-day/60" />
-            <span className="text-muted-foreground">Ideal</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded bg-bad-day/20 border border-bad-day/50" />
-            <span className="text-muted-foreground">Declining</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Star className="w-3 h-3 text-event-day" />
-            <span className="text-muted-foreground">Event</span>
+        {/* Legend */}
+        <div className="mt-5 p-4 rounded-xl bg-secondary/50 border border-border">
+          <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">
+            What the colors mean
+          </h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+            <div className="flex items-start gap-2">
+              <div className="w-4 h-4 rounded-md bg-wash-day/25 border-2 border-wash-day/50 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-foreground block">Wash Day</span>
+                <span className="text-muted-foreground">Hair is freshly washed. Curls are resetting.</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-4 h-4 rounded-md bg-building-day/25 border-2 border-building-day/50 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-foreground block">Building</span>
+                <span className="text-muted-foreground">Curls are forming and getting better each day. Not at peak yet.</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-4 h-4 rounded-md bg-ideal-day/25 border-2 border-ideal-day/50 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-foreground block">Ideal</span>
+                <span className="text-muted-foreground">Your curls are at their absolute best! Schedule events here.</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-4 h-4 rounded-md bg-good-day/20 border-2 border-good-day/45 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-foreground block">Still Good</span>
+                <span className="text-muted-foreground">Past peak but still presentable. Starting to lose definition.</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-4 h-4 rounded-md bg-bad-day/20 border-2 border-bad-day/45 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-foreground block">Declining</span>
+                <span className="text-muted-foreground">Time to wash again! Hair is losing its style.</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <Star className="w-4 h-4 text-event-day shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-foreground block">Event</span>
+                <span className="text-muted-foreground">A day you want your hair to look great for.</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

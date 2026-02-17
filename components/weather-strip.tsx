@@ -34,7 +34,7 @@ export function WeatherStrip({ weather }: WeatherStripProps) {
   return (
     <TooltipProvider delayDuration={200}>
       <div>
-        <h3 className="text-xs font-mono font-bold uppercase text-muted-foreground mb-3 tracking-wider">
+        <h3 className="text-xs font-extrabold uppercase text-muted-foreground mb-3 tracking-wide">
           16-Day Weather Forecast
         </h3>
         <div className="flex gap-1 overflow-x-auto pb-2">

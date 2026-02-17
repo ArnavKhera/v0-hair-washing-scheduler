@@ -157,18 +157,18 @@ export default function HairSchedulerPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-primary/15 border-2 border-primary/30 flex items-center justify-center">
               <Droplets className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-foreground leading-tight">
+              <h1 className="text-xl font-extrabold text-foreground leading-tight tracking-tight">
                 Hair Washing Scheduler
               </h1>
               <p className="text-xs text-muted-foreground hidden sm:block">
-                Plan your wash days around weather and events
+                Plan your curls around weather, events, and life
               </p>
             </div>
           </div>
@@ -194,7 +194,7 @@ export default function HairSchedulerPage() {
           <aside
             className={`
               fixed lg:static inset-y-0 left-0 z-30 w-80 
-              bg-card border-r border-border lg:border lg:rounded-xl 
+              bg-card border-r border-border lg:border-2 lg:rounded-2xl lg:shadow-sm 
               transform transition-transform duration-300 lg:transform-none
               ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
               overflow-y-auto max-h-[calc(100vh-4rem)] lg:max-h-none
@@ -264,14 +264,14 @@ export default function HairSchedulerPage() {
           <main className="flex-1 min-w-0 space-y-6">
             {/* Weather Strip */}
             {weather.length > 0 && (
-              <div className="p-4 rounded-xl bg-card border border-border">
+              <div className="p-4 rounded-2xl bg-card border-2 border-border shadow-sm">
                 <WeatherStrip weather={weather} />
               </div>
             )}
 
             {/* Calendar + Day Detail */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              <div className="xl:col-span-2 p-4 rounded-xl bg-card border border-border">
+              <div className="xl:col-span-2 p-5 rounded-2xl bg-card border-2 border-border shadow-sm">
                 <HairCalendar
                   currentMonth={currentMonth}
                   onMonthChange={setCurrentMonth}
@@ -282,7 +282,7 @@ export default function HairSchedulerPage() {
                 />
               </div>
 
-              <div className="p-4 rounded-xl bg-card border border-border">
+              <div className="p-5 rounded-2xl bg-card border-2 border-border shadow-sm">
                 <DayDetail
                   dayInfo={selectedDayInfo}
                   suggestedWashes={suggestedWashes}
@@ -293,7 +293,7 @@ export default function HairSchedulerPage() {
             </div>
 
             {/* Schedule Overview */}
-            <div className="p-4 rounded-xl bg-card border border-border">
+            <div className="p-5 rounded-2xl bg-card border-2 border-border shadow-sm">
               <ScheduleOverview
                 washes={washes}
                 settings={settings}

@@ -90,7 +90,7 @@ export function EventManager({
     <div className="space-y-6">
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-mono font-bold tracking-wider uppercase text-primary flex items-center gap-2">
+          <h2 className="text-sm font-extrabold tracking-wide uppercase text-primary flex items-center gap-2">
             <CalendarDays className="w-4 h-4" />
             Events
           </h2>
@@ -198,7 +198,7 @@ export function EventManager({
 
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-mono font-bold tracking-wider uppercase text-primary flex items-center gap-2">
+          <h2 className="text-sm font-extrabold tracking-wide uppercase text-primary flex items-center gap-2">
             <Droplets className="w-4 h-4" />
             Wash Days
           </h2>

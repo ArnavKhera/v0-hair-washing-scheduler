@@ -59,7 +59,7 @@ export function SettingsPanel({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-sm font-mono font-bold tracking-wider uppercase text-primary mb-4 flex items-center gap-2">
+        <h2 className="text-sm font-extrabold tracking-wide uppercase text-primary mb-4 flex items-center gap-2">
           <MapPin className="w-4 h-4" />
           Location
         </h2>
@@ -122,7 +122,7 @@ export function SettingsPanel({
       <div className="h-px bg-border" />
 
       <div>
-        <h2 className="text-sm font-mono font-bold tracking-wider uppercase text-primary mb-4 flex items-center gap-2">
+        <h2 className="text-sm font-extrabold tracking-wide uppercase text-primary mb-4 flex items-center gap-2">
           <Droplets className="w-4 h-4" />
           Curl Timeline
         </h2>
@@ -146,7 +146,7 @@ export function SettingsPanel({
                 }
                 className="flex-1"
               />
-              <span className="text-sm font-mono text-primary w-12 text-right">
+              <span className="text-sm font-bold text-primary w-12 text-right">
                 {settings.daysToIdeal}d
               </span>
             </div>
@@ -170,7 +170,7 @@ export function SettingsPanel({
                 }
                 className="flex-1"
               />
-              <span className="text-sm font-mono text-primary w-12 text-right">
+              <span className="text-sm font-bold text-primary w-12 text-right">
                 {settings.styleDuration}d
               </span>
             </div>
@@ -181,7 +181,7 @@ export function SettingsPanel({
       <div className="h-px bg-border" />
 
       <div>
-        <h2 className="text-sm font-mono font-bold tracking-wider uppercase text-primary mb-4 flex items-center gap-2">
+        <h2 className="text-sm font-extrabold tracking-wide uppercase text-primary mb-4 flex items-center gap-2">
           <Shield className="w-4 h-4" />
           Flexibility
         </h2>
@@ -237,7 +237,7 @@ export function SettingsPanel({
       </div>
 
       <div>
-        <h2 className="text-sm font-mono font-bold tracking-wider uppercase text-primary mb-3 flex items-center gap-2">
+        <h2 className="text-sm font-extrabold tracking-wide uppercase text-primary mb-3 flex items-center gap-2">
           <Timer className="w-4 h-4" />
           Bad Hair Tolerance
         </h2>
@@ -255,16 +255,16 @@ export function SettingsPanel({
             }
             className="flex-1"
           />
-          <span className="text-sm font-mono text-primary w-12 text-right">
-            {settings.toleranceDays}d
-          </span>
+              <span className="text-sm font-bold text-primary w-12 text-right">
+                {settings.toleranceDays}d
+              </span>
         </div>
       </div>
 
       <div className="h-px bg-border" />
 
       <div className="p-3 rounded-lg bg-secondary/50 border border-border">
-        <p className="text-xs font-mono text-muted-foreground mb-1">
+        <p className="text-xs font-bold text-muted-foreground mb-1">
           Current Cycle
         </p>
         <p className="text-sm text-foreground">
