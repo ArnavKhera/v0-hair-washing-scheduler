@@ -130,10 +130,10 @@ export function SettingsPanel({
         <div className="space-y-5">
           <div>
             <Label className="text-sm text-foreground mb-2 block">
-              Days until ideal curls
+              Days until ideal hair
             </Label>
             <p className="text-xs text-muted-foreground mb-3">
-              How many days after washing until your curls look their best
+              How many days after washing until your hair looks its best
             </p>
             <div className="flex items-center gap-4">
               <Slider
@@ -258,6 +258,33 @@ export function SettingsPanel({
               <span className="text-sm font-bold text-primary w-12 text-right">
                 {settings.toleranceDays}d
               </span>
+        </div>
+      </div>
+
+      <div className="h-px bg-border" />
+
+      <div>
+        <h2 className="text-sm font-extrabold tracking-wide uppercase text-primary mb-3 flex items-center gap-2">
+          <Droplets className="w-4 h-4" />
+          Humidity Threshold
+        </h2>
+        <p className="text-xs text-muted-foreground mb-3">
+          Above this humidity %, hair quality degrades faster (especially for heat-styled hair)
+        </p>
+        <div className="flex items-center gap-4">
+          <Slider
+            min={50}
+            max={100}
+            step={5}
+            value={[settings.humidityThreshold ?? 80]}
+            onValueChange={([v]) =>
+              onSettingsChange({ ...settings, humidityThreshold: v })
+            }
+            className="flex-1"
+          />
+          <span className="text-sm font-bold text-primary w-12 text-right">
+            {settings.humidityThreshold ?? 80}%
+          </span>
         </div>
       </div>
 

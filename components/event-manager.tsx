@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import type { CalendarEvent, WashDay } from "@/lib/hair-scheduler-types";
+import { useState, useEffect } from "react";
+import type { CalendarEvent, WashDay, Hairstyle } from "@/lib/hair-scheduler-types";
+import { HAIRSTYLES, HAIRSTYLE_DEFAULTS } from "@/lib/hair-scheduler-types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +27,7 @@ import {
   Plus,
   CalendarDays,
   Star,
-  Trash2,
+  Scissors,
   Droplets,
   CalendarPlus,
   X,
@@ -32,7 +40,7 @@ interface EventManagerProps {
   washes: WashDay[];
   onAddWash: (wash: WashDay) => void;
   onRemoveWash: (date: string) => void;
-  onMarkWashToday: () => void;
+  onMarkWashToday: (wash: WashDay) => void;
 }
 
 export function EventManager({
@@ -46,6 +54,7 @@ export function EventManager({
 }: EventManagerProps) {
   const [showEventDialog, setShowEventDialog] = useState(false);
   const [showWashDialog, setShowWashDialog] = useState(false);
+  const [showTodayDialog, setShowTodayDialog] = useState(false);
   const [eventTitle, setEventTitle] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventImportant, setEventImportant] = useState(true);
@@ -53,6 +62,26 @@ export function EventManager({
   const [washType, setWashType] = useState<"completed" | "scheduled">(
     "scheduled"
   );
+  const [washHairstyle, setWashHairstyle] = useState<Hairstyle | "">("");
+  const [washDaysToOptimal, setWashDaysToOptimal] = useState<number>(0);
+  const [todayHairstyle, setTodayHairstyle] = useState<Hairstyle | "">("");
+  const [todayDaysToOptimal, setTodayDaysToOptimal] = useState<number>(0);
+
+  // Update days-to-optimal default when hairstyle changes (schedule dialog)
+  useEffect(() => {
+    if (washHairstyle) {
+      const defaults = HAIRSTYLE_DEFAULTS[washHairstyle];
+      if (defaults) setWashDaysToOptimal(defaults.daysToOptimal);
+    }
+  }, [washHairstyle]);
+
+  // Update days-to-optimal default when hairstyle changes (today dialog)
+  useEffect(() => {
+    if (todayHairstyle) {
+      const defaults = HAIRSTYLE_DEFAULTS[todayHairstyle];
+      if (defaults) setTodayDaysToOptimal(defaults.daysToOptimal);
+    }
+  }, [todayHairstyle]);
 
   const handleAddEvent = () => {
     if (!eventTitle.trim() || !eventDate) return;
@@ -70,13 +99,37 @@ export function EventManager({
 
   const handleAddWash = () => {
     if (!washDate) return;
-    onAddWash({
+    const wash: WashDay = {
       date: washDate,
       type: washType,
       reason: washType === "completed" ? "Completed wash" : "Planned wash",
-    });
+    };
+    if (washHairstyle) {
+      wash.hairstyle = washHairstyle;
+      wash.daysToOptimal = washDaysToOptimal;
+    }
+    onAddWash(wash);
     setWashDate("");
+    setWashHairstyle("");
+    setWashDaysToOptimal(0);
     setShowWashDialog(false);
+  };
+
+  const handleMarkToday = () => {
+    const today = new Date().toISOString().split("T")[0];
+    const wash: WashDay = {
+      date: today,
+      type: "completed",
+      reason: "Washed today",
+    };
+    if (todayHairstyle) {
+      wash.hairstyle = todayHairstyle;
+      wash.daysToOptimal = todayDaysToOptimal;
+    }
+    onMarkWashToday(wash);
+    setTodayHairstyle("");
+    setTodayDaysToOptimal(0);
+    setShowTodayDialog(false);
   };
 
   const sortedEvents = [...events].sort((a, b) =>

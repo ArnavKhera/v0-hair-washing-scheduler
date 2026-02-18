@@ -28,7 +28,7 @@ function getPhaseLabel(phase: DayInfo["phase"]): string {
     case "building":
       return "Building Up";
     case "ideal":
-      return "Ideal Curls";
+      return "Ideal Hair";
     case "good":
       return "Still Good";
     case "declining":
@@ -127,15 +127,15 @@ export function DayDetail({
 
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs text-muted-foreground">Curl Quality</span>
+          <span className="text-xs text-muted-foreground">Hair Quality</span>
           <span className="text-sm font-extrabold text-foreground">
-            {dayInfo.curlQuality}%
+            {dayInfo.hairQuality}%
           </span>
         </div>
         <div className="w-full h-2.5 rounded-full bg-secondary overflow-hidden">
           <div
-            className={`h-full rounded-full bg-gradient-to-r ${getQualityGradient(dayInfo.curlQuality)} transition-all duration-300`}
-            style={{ width: `${dayInfo.curlQuality}%` }}
+            className={`h-full rounded-full bg-gradient-to-r ${getQualityGradient(dayInfo.hairQuality)} transition-all duration-300`}
+            style={{ width: `${dayInfo.hairQuality}%` }}
           />
         </div>
       </div>
@@ -178,7 +178,7 @@ export function DayDetail({
           {(dayInfo.weather.humidity > 60 ||
             dayInfo.weather.precipitationProbability > 40) && (
             <p className="text-xs text-bad-day mt-2 italic">
-              {dayInfo.weather.humidity > 60 && "High humidity may affect curl hold. "}
+              {dayInfo.weather.humidity > 60 && "High humidity may affect hair quality. "}
               {dayInfo.weather.precipitationProbability > 40 && "Rain expected -- consider covering hair."}
             </p>
           )}

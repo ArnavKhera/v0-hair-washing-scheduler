@@ -131,7 +131,7 @@ export function HairCalendar({
                     className={`
                       aspect-square rounded-xl border-2 text-sm relative flex flex-col items-center justify-center gap-0.5
                       transition-all duration-150 cursor-pointer
-                      ${info ? getQualityColor(info.curlQuality, info.phase) : "bg-secondary/30 border-border text-muted-foreground"}
+                      ${info ? getQualityColor(info.hairQuality, info.phase) : "bg-secondary/30 border-border text-muted-foreground"}
                       ${isToday ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}
                       ${isSelected ? "ring-2 ring-foreground ring-offset-2 ring-offset-background scale-105" : ""}
                       hover:scale-105 hover:shadow-md
@@ -141,7 +141,7 @@ export function HairCalendar({
                       {dayNum}
                     </span>
                     {info && info.phase !== "none" && (
-                      <div className={`w-3/4 h-1 rounded-full ${getQualityBar(info.curlQuality)}`} />
+                      <div className={`w-3/4 h-1 rounded-full ${getQualityBar(info.hairQuality)}`} />
                     )}
                     <div className="absolute top-0.5 right-0.5 flex gap-px">
                       {info?.isWashDay && (
@@ -158,9 +158,9 @@ export function HairCalendar({
                     <div className="space-y-1">
                       <p className="font-bold text-sm">{new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</p>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${getQualityBar(info.curlQuality)}`} />
+                        <div className={`w-2 h-2 rounded-full ${getQualityBar(info.hairQuality)}`} />
                         <span className="text-xs">
-                          Curl quality: {info.curlQuality}% ({info.phase})
+                          Hair quality: {info.hairQuality}% ({info.phase})
                         </span>
                       </div>
                       {info.daysSinceLastWash !== null && (
@@ -201,21 +201,21 @@ export function HairCalendar({
               <div className="w-4 h-4 rounded-md bg-wash-day/25 border-2 border-wash-day/50 shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-foreground block">Wash Day</span>
-                <span className="text-muted-foreground">Hair is freshly washed. Curls are resetting.</span>
+                <span className="text-muted-foreground">Hair is freshly washed and resetting.</span>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <div className="w-4 h-4 rounded-md bg-building-day/25 border-2 border-building-day/50 shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-foreground block">Building</span>
-                <span className="text-muted-foreground">Curls are forming and getting better each day. Not at peak yet.</span>
+                <span className="text-muted-foreground">Hair is settling in and improving each day. Not at peak yet.</span>
               </div>
             </div>
             <div className="flex items-start gap-2">
               <div className="w-4 h-4 rounded-md bg-ideal-day/25 border-2 border-ideal-day/50 shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-foreground block">Ideal</span>
-                <span className="text-muted-foreground">Your curls are at their absolute best! Schedule events here.</span>
+                <span className="text-muted-foreground">Your hair looks its absolute best! Schedule events here.</span>
               </div>
             </div>
             <div className="flex items-start gap-2">

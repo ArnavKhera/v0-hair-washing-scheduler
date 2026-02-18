@@ -4,7 +4,9 @@ import type {
   CalendarEvent,
   WashDay,
   DayInfo,
+  Hairstyle,
 } from "./hair-scheduler-types";
+import { HAIRSTYLE_DEFAULTS } from "./hair-scheduler-types";
 
 function dateStr(d: Date): string {
   return d.toISOString().split("T")[0];
@@ -27,18 +29,40 @@ function diffDays(a: string, b: string): number {
   return Math.round((da.getTime() - db.getTime()) / 86400000);
 }
 
-export function calculateCurlQuality(
+/**
+ * Get the weather sensitivity multiplier for a given hairstyle.
+ * High sensitivity (blowout/straight) = more degradation from humidity/rain.
+ * Low sensitivity (curls/braids) = more resistant to humidity/rain.
+ */
+function getWeatherSensitivityMultiplier(hairstyle?: Hairstyle): number {
+  if (!hairstyle) return 1.0; // default moderate
+  const defaults = HAIRSTYLE_DEFAULTS[hairstyle];
+  if (!defaults) return 1.0;
+  switch (defaults.weatherSensitivity) {
+    case "high": return 1.8;   // straight/blowout styles degrade much faster
+    case "medium": return 1.0; // baseline
+    case "low": return 0.4;    // curly/braid styles are resistant
+  }
+}
+
+export function calculateHairQuality(
   daysSinceWash: number,
   settings: HairSettings,
-  weather: WeatherDay | null
+  weather: WeatherDay | null,
+  hairstyle?: Hairstyle,
+  daysToOptimalOverride?: number
 ): number {
-  const { daysToIdeal, styleDuration } = settings;
+  // Use the hairstyle-specific daysToOptimal if available, falling back to settings
+  const daysToIdeal = daysToOptimalOverride ?? (hairstyle ? HAIRSTYLE_DEFAULTS[hairstyle]?.daysToOptimal ?? settings.daysToIdeal : settings.daysToIdeal);
+  const { styleDuration } = settings;
   let quality: number;
 
   if (daysSinceWash === 0) {
-    quality = 50;
+    // Instant styles are 100% on wash day; non-instant styles start lower
+    const isInstant = hairstyle ? (HAIRSTYLE_DEFAULTS[hairstyle]?.isInstant ?? false) : daysToIdeal === 0;
+    quality = isInstant ? 100 : 50;
   } else if (daysSinceWash < daysToIdeal) {
-    quality = 50 + (50 * daysSinceWash) / daysToIdeal;
+    quality = 50 + (50 * daysSinceWash) / Math.max(1, daysToIdeal);
   } else if (daysSinceWash < daysToIdeal + styleDuration) {
     const progress =
       (daysSinceWash - daysToIdeal) / Math.max(1, styleDuration - 1);
@@ -48,12 +72,19 @@ export function calculateCurlQuality(
     quality = Math.max(5, 90 - 20 * overtime);
   }
 
+  // Weather-based degradation, scaled by hairstyle sensitivity
   if (weather) {
-    if (weather.humidity > 60) {
-      quality -= (weather.humidity - 60) * 0.4;
+    const sensitivity = getWeatherSensitivityMultiplier(hairstyle);
+    const humidityThreshold = settings.humidityThreshold ?? 80;
+
+    if (weather.humidity > humidityThreshold) {
+      quality -= (weather.humidity - humidityThreshold) * 0.5 * sensitivity;
+    } else if (weather.humidity > 60) {
+      quality -= (weather.humidity - 60) * 0.2 * sensitivity;
     }
+
     if (weather.precipitationProbability > 40) {
-      quality -= (weather.precipitationProbability - 40) * 0.3;
+      quality -= (weather.precipitationProbability - 40) * 0.35 * sensitivity;
     }
   }
 
@@ -101,6 +132,48 @@ export function getWeatherAdjustedStyleDuration(
   return Math.max(1, settings.styleDuration - Math.floor(reductionDays));
 }
 
+/**
+ * Check if a day is rainy (precipitation probability > 50%).
+ */
+function isRainyDay(date: string, weatherMap: Map<string, WeatherDay>): boolean {
+  const w = weatherMap.get(date);
+  return !!w && w.precipitationProbability > 50;
+}
+
+/**
+ * Check if tomorrow is rainy -- we want to avoid washing the day before rain
+ * because "when it's raining my hair is greasy and not clean".
+ */
+function isTomorrowRainy(date: string, weatherMap: Map<string, WeatherDay>): boolean {
+  return isRainyDay(addDays(date, 1), weatherMap);
+}
+
+/**
+ * Shift a wash date to avoid rainy days and the day before rain.
+ * Tries up to 3 days before and after to find a dry day.
+ */
+function findBestWashDate(
+  targetDate: string,
+  weatherMap: Map<string, WeatherDay>,
+  minDate: string
+): { date: string; shifted: boolean } {
+  // If target date is fine, use it
+  if (!isRainyDay(targetDate, weatherMap) && !isTomorrowRainy(targetDate, weatherMap)) {
+    return { date: targetDate, shifted: false };
+  }
+
+  // Try shifting 1-3 days earlier then 1-3 days later
+  for (const offset of [-1, 1, -2, 2, -3, 3]) {
+    const candidate = addDays(targetDate, offset);
+    if (candidate < minDate) continue;
+    if (!isRainyDay(candidate, weatherMap) && !isTomorrowRainy(candidate, weatherMap)) {
+      return { date: candidate, shifted: true };
+    }
+  }
+  // Fall back to original date if no dry alternative found
+  return { date: targetDate, shifted: false };
+}
+
 export function suggestWashDays(
   events: CalendarEvent[],
   existingWashes: WashDay[],
@@ -144,12 +217,15 @@ export function suggestWashDays(
 
   for (const target of consolidatedTargets) {
     if (!allWashDates.has(target.date)) {
-      suggestions.push({
-        date: target.date,
-        type: "suggested",
-        reason: target.reason,
-      });
-      allWashDates.add(target.date);
+      // Try to shift away from rain for event-based washes
+      const best = findBestWashDate(target.date, weatherMap, today);
+      if (!allWashDates.has(best.date)) {
+        const reason = best.shifted
+          ? `${target.reason} (shifted to avoid rain)`
+          : target.reason;
+        suggestions.push({ date: best.date, type: "suggested", reason });
+        allWashDates.add(best.date);
+      }
     }
   }
 
@@ -157,27 +233,29 @@ export function suggestWashDays(
   if (allDates.length === 0) {
     let current = today;
     while (current <= rangeEnd) {
-      suggestions.push({
-        date: current,
-        type: "suggested",
-        reason: "Maintenance wash",
-      });
-      allWashDates.add(current);
+      const best = findBestWashDate(current, weatherMap, today);
+      if (!allWashDates.has(best.date)) {
+        const reason = best.shifted
+          ? "Maintenance wash (shifted to avoid rain)"
+          : "Maintenance wash";
+        suggestions.push({ date: best.date, type: "suggested", reason });
+        allWashDates.add(best.date);
+      }
       current = addDays(current, cycleLength);
     }
   } else {
     let current = allDates[allDates.length - 1];
     let nextWash = addDays(current, cycleLength);
     while (nextWash <= rangeEnd) {
-      if (!allWashDates.has(nextWash)) {
-        suggestions.push({
-          date: nextWash,
-          type: "suggested",
-          reason: "Maintenance wash",
-        });
-        allWashDates.add(nextWash);
+      const best = findBestWashDate(nextWash, weatherMap, today);
+      if (!allWashDates.has(best.date)) {
+        const reason = best.shifted
+          ? "Maintenance wash (shifted to avoid rain)"
+          : "Maintenance wash";
+        suggestions.push({ date: best.date, type: "suggested", reason });
+        allWashDates.add(best.date);
       }
-      current = nextWash;
+      current = best.date;
       nextWash = addDays(current, cycleLength);
     }
   }
@@ -241,19 +319,22 @@ export function buildDayInfoMap(
     const weather = weatherMap.get(current) || null;
     const dayEvents = events.filter((e) => e.date === current);
 
-    let lastWash: string | null = null;
+    let lastWashEntry: WashDay | null = null;
     for (const w of sortedWashes) {
-      if (w.date <= current) lastWash = w.date;
+      if (w.date <= current) lastWashEntry = w;
     }
 
     const daysSinceLastWash =
-      lastWash !== null ? diffDays(current, lastWash) : null;
+      lastWashEntry !== null ? diffDays(current, lastWashEntry.date) : null;
     const isWashDay = sortedWashes.some((w) => w.date === current);
     const washEntry = sortedWashes.find((w) => w.date === current);
 
-    const curlQuality =
+    const lastHairstyle = lastWashEntry?.hairstyle;
+    const lastDaysToOptimal = lastWashEntry?.daysToOptimal;
+
+    const hairQuality =
       daysSinceLastWash !== null
-        ? calculateCurlQuality(daysSinceLastWash, settings, weather)
+        ? calculateHairQuality(daysSinceLastWash, settings, weather, lastHairstyle, lastDaysToOptimal)
         : 0;
 
     const phase =
@@ -267,7 +348,7 @@ export function buildDayInfoMap(
     map.set(current, {
       date: current,
       daysSinceLastWash,
-      curlQuality,
+      hairQuality,
       weather,
       isWashDay,
       washType: washEntry?.type,
@@ -275,6 +356,8 @@ export function buildDayInfoMap(
       isGoodWindow,
       events: dayEvents,
       phase,
+      lastWashHairstyle: lastHairstyle,
+      lastWashDaysToOptimal: lastDaysToOptimal,
     });
 
     current = addDays(current, 1);

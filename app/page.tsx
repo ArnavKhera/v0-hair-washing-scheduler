@@ -37,6 +37,7 @@ export default function HairSchedulerPage() {
     styleDuration: 3,
     toleranceDays: 2,
     flexibilityMode: "moderate",
+    humidityThreshold: 80,
   });
 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -90,13 +91,9 @@ export default function HairSchedulerPage() {
     setManualWashes((prev) => prev.filter((w) => w.date !== date));
   }, []);
 
-  const handleMarkWashToday = useCallback(() => {
-    handleAddWash({
-      date: today,
-      type: "completed",
-      reason: "Washed today",
-    });
-  }, [today, handleAddWash]);
+  const handleMarkWashToday = useCallback((wash: WashDay) => {
+    handleAddWash(wash);
+  }, [handleAddWash]);
 
   const handleScheduleWash = useCallback(
     (date: string) => {
@@ -168,7 +165,7 @@ export default function HairSchedulerPage() {
                 Hair Washing Scheduler
               </h1>
               <p className="text-xs text-muted-foreground hidden sm:block">
-                Plan your curls around weather, events, and life
+                Plan your hair around weather, events, and life
               </p>
             </div>
           </div>
